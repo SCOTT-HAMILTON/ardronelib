@@ -28,11 +28,11 @@
 #define GRAVITY     (9.81f)
 
 #ifndef min
-#define min(a, b) (a) < (b) ? (a) : (b)
+#define mymin(a, b) (a) < (b) ? (a) : (b)
 #endif
 
 #ifndef max
-#define max(a, b) (a) < (b) ? (b) : (a)
+#define mymax(a, b) (a) < (b) ? (b) : (a)
 #endif
 
 typedef struct _screen_point_t {

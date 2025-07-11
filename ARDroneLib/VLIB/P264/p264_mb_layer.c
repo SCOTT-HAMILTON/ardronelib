@@ -12,8 +12,8 @@
 
 #include <VP_Os/vp_os_print.h>
 
-#define min(a,b) ((a)<(b)?(a):(b))
-#define max(a,b) ((a)>(b)?(a):(b))
+#define mymin(a,b) ((a)<(b)?(a):(b))
+#define mymax(a,b) ((a)>(b)?(a):(b))
 
 // macro helper to read an intra 4x4 mode using prediction
 #define READ_INTRA_CODE(pred,dest_intra) \
@@ -52,7 +52,7 @@ intra_4x4_mode_t make_boundary_pred(intra_4x4_mode_t* left_intra_4x4, uint32_t l
     else
       up_mode = up_intra_4x4[up_index];
 
-    pred = min(left_mode,up_mode);
+    pred = mymin(left_mode,up_mode);
   }
 
   return pred;
@@ -131,8 +131,8 @@ void p264_read_mv(video_stream_t* const stream, video_gob_t*  gobs, uint32_t i_b
     by = gobs[i_blockline-1].macroblocks[i_mb].inter_MV[0].y;
     cx = gobs[i_blockline-1].macroblocks[i_mb+1].inter_MV[0].x;
     cy = gobs[i_blockline-1].macroblocks[i_mb+1].inter_MV[0].y;
-    pred_x = ax + bx + cx - min(ax,min(bx,cx)) - max(ax,max(bx,cx));
-    pred_y = ay + by + cy - min(ay,min(by,cy)) - max(ay,max(by,cy));
+    pred_x = ax + bx + cx - mymin(ax,mymin(bx,cx)) - mymax(ax,mymax(bx,cx));
+    pred_y = ay + by + cy - mymin(ay,mymin(by,cy)) - mymax(ay,mymax(by,cy));
   }
   else if (i_mb == (num_mb_per_line-1))
   {
@@ -143,8 +143,8 @@ void p264_read_mv(video_stream_t* const stream, video_gob_t*  gobs, uint32_t i_b
     by = gobs[i_blockline-1].macroblocks[i_mb].inter_MV[0].y;
     cx = gobs[i_blockline-1].macroblocks[i_mb-1].inter_MV[0].x; // in fact D
     cy = gobs[i_blockline-1].macroblocks[i_mb-1].inter_MV[0].y; // in fact D
-    pred_x = ax + bx + cx - min(ax,min(bx,cx)) - max(ax,max(bx,cx));
-    pred_y = ay + by + cy - min(ay,min(by,cy)) - max(ay,max(by,cy));
+    pred_x = ax + bx + cx - mymin(ax,mymin(bx,cx)) - mymax(ax,mymax(bx,cx));
+    pred_y = ay + by + cy - mymin(ay,mymin(by,cy)) - mymax(ay,mymax(by,cy));
   }
   else
   {
@@ -155,8 +155,8 @@ void p264_read_mv(video_stream_t* const stream, video_gob_t*  gobs, uint32_t i_b
     by = gobs[i_blockline-1].macroblocks[i_mb].inter_MV[0].y;
     cx = gobs[i_blockline-1].macroblocks[i_mb+1].inter_MV[0].x;
     cy = gobs[i_blockline-1].macroblocks[i_mb+1].inter_MV[0].y;
-    pred_x = ax + bx + cx - min(ax,min(bx,cx)) - max(ax,max(bx,cx));
-    pred_y = ay + by + cy - min(ay,min(by,cy)) - max(ay,max(by,cy));
+    pred_x = ax + bx + cx - mymin(ax,mymin(bx,cx)) - mymax(ax,mymax(bx,cx));
+    pred_y = ay + by + cy - mymin(ay,mymin(by,cy)) - mymax(ay,mymax(by,cy));
   }
 
   // read mv, add prediction and save
@@ -219,7 +219,7 @@ void p264_read_intra_4x4 (video_stream_t* const stream, video_gob_t*  gobs, uint
   pred = make_boundary_pred(left_intra_4x4,7,current_intra_4x4,0,left_boundary_block);
   READ_INTRA_CODE(pred,current_intra_4x4[2]);
   // read intra(1,1)
-  pred = min(current_intra_4x4[1],current_intra_4x4[2]);
+  pred = mymin(current_intra_4x4[1],current_intra_4x4[2]);
   READ_INTRA_CODE(pred,current_intra_4x4[3]);
 
   // read intra(2,0)
@@ -229,36 +229,36 @@ void p264_read_intra_4x4 (video_stream_t* const stream, video_gob_t*  gobs, uint
   pred = make_boundary_pred(current_intra_4x4,4,up_intra_4x4,15,up_boundary_block);
   READ_INTRA_CODE(pred,current_intra_4x4[5]);
   // read intra(2,1)
-  pred = min(current_intra_4x4[4],current_intra_4x4[3]);
+  pred = mymin(current_intra_4x4[4],current_intra_4x4[3]);
   READ_INTRA_CODE(pred,current_intra_4x4[6]);
   // read intra(3,1)
-  pred = min(current_intra_4x4[5],current_intra_4x4[6]);
+  pred = mymin(current_intra_4x4[5],current_intra_4x4[6]);
   READ_INTRA_CODE(pred,current_intra_4x4[7]);
 
   // read intra(0,2)
   pred = make_boundary_pred(left_intra_4x4,13,current_intra_4x4,2,left_boundary_block);
   READ_INTRA_CODE(pred,current_intra_4x4[8]);
   // read intra(1,2)
-  pred = min(current_intra_4x4[8],current_intra_4x4[3]);
+  pred = mymin(current_intra_4x4[8],current_intra_4x4[3]);
   READ_INTRA_CODE(pred,current_intra_4x4[9]);
   // read intra(0,3)
   pred = make_boundary_pred(left_intra_4x4,15,current_intra_4x4,8,left_boundary_block);
   READ_INTRA_CODE(pred,current_intra_4x4[10]);
   // read intra(1,3)
-  pred = min(current_intra_4x4[9],current_intra_4x4[10]);
+  pred = mymin(current_intra_4x4[9],current_intra_4x4[10]);
   READ_INTRA_CODE(pred,current_intra_4x4[11]);
 
   // read intra(2,2)
-  pred = min(current_intra_4x4[9],current_intra_4x4[6]);
+  pred = mymin(current_intra_4x4[9],current_intra_4x4[6]);
   READ_INTRA_CODE(pred,current_intra_4x4[12]);
   // read intra(3,2)
-  pred = min(current_intra_4x4[12],current_intra_4x4[7]);
+  pred = mymin(current_intra_4x4[12],current_intra_4x4[7]);
   READ_INTRA_CODE(pred,current_intra_4x4[13]);
     // read intra(2,3)
-  pred = min(current_intra_4x4[11],current_intra_4x4[12]);
+  pred = mymin(current_intra_4x4[11],current_intra_4x4[12]);
   READ_INTRA_CODE(pred,current_intra_4x4[14]);
     // read intra(3,3)
-  pred = min(current_intra_4x4[13],current_intra_4x4[14]);
+  pred = mymin(current_intra_4x4[13],current_intra_4x4[14]);
   READ_INTRA_CODE(pred,current_intra_4x4[15]);
 
 }

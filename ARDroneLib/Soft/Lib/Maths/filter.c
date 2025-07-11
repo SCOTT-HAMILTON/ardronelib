@@ -160,8 +160,8 @@ int32_t digitalsmooth(int32_t rawIn, int32_t *sensSmoothArray)
       }
   }
 
-  bottom = max(((filterSamples * 15)  / 100), 1);
-  top = min((((filterSamples * 85) / 100) + 1  ), (filterSamples - 1));
+  bottom = mymax(((filterSamples * 15)  / 100), 1);
+  top = mymin((((filterSamples * 85) / 100) + 1  ), (filterSamples - 1));
   k = 0;
   total = 0;
   for ( j = bottom; j< top; j++){
