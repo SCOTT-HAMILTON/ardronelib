@@ -30,8 +30,8 @@
 // To deactivate, define to (0)
 
 #ifdef DEBUG // Debug options
-#define _FTP_DEBUG (0) // Common debug informations
-#define _FTP_VERBOSE (0) // Extended debug information (many outputs on ftpList)
+#define _FTP_DEBUG (1) // Common debug informations
+#define _FTP_VERBOSE (1) // Extended debug information (many outputs on ftpList)
 #define _FTP_ERRORS_PRINT (1) // Display of error messages
 #else // Release options
 #define _FTP_DEBUG (0)
@@ -541,6 +541,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
         NULL == password ||
         NULL == status)
     {
+        printf("fptConnect NULL pointers\n");
         FTP_ERROR ("Must not pass NULL pointers to ftpConnect\n");
         if (NULL != status) { *status = FTP_FAIL; }
         return NULL;
@@ -548,10 +549,12 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     int isAnonymous = ((0 == strcmp (username, "anonymous")) || (0 == strcmp (username, ""))) ? 1 : 0;
     if (1 == isAnonymous)
     {
+        printf("fptConnect Connecting to %s:%d, anonymous\n", ip, port);
         FTP_DEBUG ("Connecting to %s:%d, anonymous\n", ip, port);
     }
     else
     {
+        printf("fptConnect Connecting to %s:%d, USER = %s, Password = %s\n", ip, port, username, password);
         FTP_DEBUG ("Connecting to %s:%d, USER = %s, Password = %s\n", ip, port, username, password);
     }
 
