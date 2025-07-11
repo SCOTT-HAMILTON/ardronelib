@@ -86,7 +86,7 @@
 
 #define WIFI_PASSKEY            "9F1C3EE11CBA230B27BF1C1B6F"
 
-#define FTP_PORT				5551
+#define FTP_PORT				21
 #define AUTH_PORT				5552
 #define VIDEO_RECORDER_PORT     5553
 #define NAVDATA_PORT            5554
