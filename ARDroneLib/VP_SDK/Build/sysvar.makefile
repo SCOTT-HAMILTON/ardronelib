@@ -52,7 +52,7 @@ else
     ifeq ($(USE_MINGW32),yes)
       OS_TARGET_ID=mingw32_gtk+-2.14.7
       GENERIC_COMMAND_PREFIX=i586-mingw32msvc-
-      ifeq ($(shell which $(GENERIC_COMMAND_PREFIX)gcc 2> /dev/null),)
+      ifeq ($(shell command -v $(GENERIC_COMMAND_PREFIX)gcc 2> /dev/null),)
         $(error ERROR You need Minimalist GNU Win32 cross compiler. (under Debian: apt-get install mingw32))
       endif
     else
@@ -91,7 +91,7 @@ else
           TOOLCHAIN_PATH=$(NDK_PATH)/toolchains/$(TOOLCHAIN_VERSION)/prebuilt/linux-x86/bin
           GENERIC_COMMAND_PREFIX=$(TOOLCHAIN_PATH)/arm-linux-androideabi-
         else
-	TOOLCHAIN_PATH=$(shell which gcc | sed "s:/gcc::")
+	TOOLCHAIN_PATH=$(shell command -v gcc | sed "s:/gcc::")
 	GENERIC_COMMAND_PREFIX=$(TOOLCHAIN_PATH)/
         endif
 	endif

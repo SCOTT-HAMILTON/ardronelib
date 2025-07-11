@@ -30,8 +30,8 @@
 // To deactivate, define to (0)
 
 #ifdef DEBUG // Debug options
-#define _FTP_DEBUG (0) // Common debug informations
-#define _FTP_VERBOSE (0) // Extended debug information (many outputs on ftpList)
+#define _FTP_DEBUG (1) // Common debug informations
+#define _FTP_VERBOSE (1) // Extended debug information (many outputs on ftpList)
 #define _FTP_ERRORS_PRINT (1) // Display of error messages
 #else // Release options
 #define _FTP_DEBUG (0)
