@@ -562,6 +562,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     _ftp_t *retFtp = vp_os_malloc (sizeof (_ftp_t));
     if (NULL == retFtp)
     {
+        printf("fptConnect Unable to allocate a ftp structure\n");
         FTP_ERROR ("Unable to allocate a ftp structure\n");
         return NULL;
     }
@@ -571,6 +572,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     retFtp->socket = vp_os_malloc (sizeof (vp_com_socket_t));
     if (NULL == retFtp->socket)
     {
+        printf("ftpConnect Unable to allocate socket filed of the ftp structure\n");
         FTP_ERROR ("Unable to allocate socket filed of the ftp structure\n");
         ftpClose (&retFtp);
         return NULL;
@@ -588,6 +590,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     C_RESULT vp_result = vp_com_open_socket (retFtp->socket, &(retFtp->readSock), &(retFtp->writeSock));
     if (VP_FAILED (vp_result))
     {
+        printf("ftpConnect Unable to connect\n");
         FTP_ERROR ("Unable to connect\n");
         ftpClose (&retFtp);
         return NULL;
@@ -596,6 +599,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     int result = setSockTimeout ((int)retFtp->socket->priv, SOCK_TO_SEC, SOCK_TO_USEC);
     if (0 > result)
     {
+        printf("ftpConnect Unable to set socket timeout\n");
         FTP_ERROR ("Unable to set socket timeout\n");
         ftpClose (&retFtp);
         return NULL;
@@ -604,12 +608,14 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     char *srvMsg = vp_os_calloc (MAX_SIZE_MSG, 1);
     if (NULL == srvMsg)
     {
+        printf("ftpConnect Unable to allocate buffer\n");
         FTP_ERROR ("Unable to allocate buffer\n");
         ftpClose (&retFtp);
         return NULL;
     }
     if (FTP_FAILED (ftpRecv (retFtp, srvMsg, MAX_SIZE_MSG-1)))
     {
+        printf("ftpConnect Unable to recieve data from server\n");
         FTP_ERROR ("Unable to recieve data from server\n");
         ftpClose (&retFtp);
         vp_os_free (srvMsg);
@@ -619,6 +625,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     int repCode = getResponseCode (srvMsg);
     if (220 != repCode)
     {
+        printf("ftpConnect Bad response from server (%d, expected 220)\n");
         FTP_ERROR ("Bad response from server (%d, expected 220)\n", repCode);
         ftpClose (&retFtp);
         vp_os_free (srvMsg);
@@ -628,6 +635,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     char *buffer = vp_os_calloc (COMMAND_BUFFER_SIZE, 1);
     if (NULL == buffer)
     {
+        printf("ftpConnect Unable to allocate buffer\n");
         FTP_ERROR ("Unable to allocate buffer\n");
         ftpClose (&retFtp);
         vp_os_free (srvMsg);
@@ -643,6 +651,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     }
     if (FTP_FAILED (ftpTransfert (retFtp, buffer, srvMsg, MAX_SIZE_MSG-1)))
     {
+        printf("ftpConnect Error while sending command\n");
         FTP_ERROR ("Error while sending command\n");
         ftpClose (&retFtp);
         vp_os_free (srvMsg);
@@ -657,6 +666,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     }
     if (goodRepCode != repCode)
     {
+        printf("ftpConnect Bad response from server (%d, expected %d)\n", repCode, goodRepCode);
         FTP_ERROR ("Bad response from server (%d, expected %d)\n", repCode, goodRepCode);
         ftpClose (&retFtp);
         vp_os_free (srvMsg);
@@ -670,6 +680,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
         snprintf (buffer, COMMAND_BUFFER_SIZE-1, "PASS %s\r\n", password);
         if (FTP_FAILED (ftpTransfert (retFtp, buffer, srvMsg, MAX_SIZE_MSG-1)))
         {
+            printf("ftpConnect Error while sending command\n");
             FTP_ERROR ("Error while sending command\n");
             ftpClose (&retFtp);
             vp_os_free (srvMsg);
@@ -679,6 +690,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
         repCode = getResponseCode (srvMsg);
         if (230 != repCode)
         {
+            printf("ftpConnect Bad response from server (%d, expected 230)\n", repCode);
             FTP_ERROR ("Bad response from server (%d, expected 230)\n", repCode);
             ftpClose (&retFtp);
             vp_os_free (srvMsg);
@@ -694,6 +706,7 @@ ftpConnect (const char *ip, int port, const char *username, const char *password
     retFtp->tag = NULL;
     vp_os_free (srvMsg);
     vp_os_free (buffer);
+    printf("ftpConnect Successful\n");
     return retFtp;
 }
 

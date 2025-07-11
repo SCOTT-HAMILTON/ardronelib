@@ -30,17 +30,17 @@ compareVersions (ardrone_version_t *v1, ardrone_version_t *v2)
 int
 getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *version)
 {
-  printf("getDroneVersion in 1");
+  printf("getDroneVersion in 1\n");
   if (NULL == tempPath || NULL == droneIp || NULL == version)
     {
-      printf("getDroneVersion exit 1");
+      printf("getDroneVersion exit 1\n");
       return -1;
     }
   _ftp_status status;
   _ftp_t *ftp = ftpConnect (droneIp, FTP_PORT, "anonymous", "", &status);
   if (FTP_FAILED (status) || NULL == ftp)
     {
-      printf("getDroneVersion exit 2");
+      printf("getDroneVersion exit 2\n");
       ftpClose (&ftp);
       return -1;
     }
@@ -50,7 +50,7 @@ getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *v
   if (NULL == localName)
     {
       ftpClose (&ftp);
-      printf("getDroneVersion exit 3");
+      printf("getDroneVersion exit 3\n");
       return -1;
     }
 
@@ -61,7 +61,7 @@ getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *v
       vp_os_free (localName);
       localName = NULL;
       ftpClose (&ftp);
-      printf("getDroneVersion exit 4");
+      printf("getDroneVersion exit 4\n");
       return -1;
     }
   
@@ -73,7 +73,7 @@ getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *v
       remove (localName);
       vp_os_free (localName);
       localName = NULL;
-      printf("getDroneVersion exit 5");
+      printf("getDroneVersion exit 5\n");
       return -1;
     }
 
@@ -84,7 +84,7 @@ getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *v
       remove (localName);
       vp_os_free (localName);
       localName = NULL;
-      printf("getDroneVersion exit 6");
+      printf("getDroneVersion exit 6\n");
       return -1;
     }
   
@@ -96,7 +96,7 @@ getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *v
   version->majorVersion = maj;
   version->minorVersion = min;
   version->revision = rev;
-  printf("getDroneVersion success");
+  printf("getDroneVersion success\n");
 
   return 0;
 }
