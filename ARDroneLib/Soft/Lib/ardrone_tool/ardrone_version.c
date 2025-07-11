@@ -30,14 +30,17 @@ compareVersions (ardrone_version_t *v1, ardrone_version_t *v2)
 int
 getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *version)
 {
+  printf("getDroneVersion in 1");
   if (NULL == tempPath || NULL == droneIp || NULL == version)
     {
+      printf("getDroneVersion exit 1");
       return -1;
     }
   _ftp_status status;
   _ftp_t *ftp = ftpConnect (droneIp, FTP_PORT, "anonymous", "", &status);
   if (FTP_FAILED (status) || NULL == ftp)
     {
+      printf("getDroneVersion exit 2");
       ftpClose (&ftp);
       return -1;
     }
@@ -47,6 +50,7 @@ getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *v
   if (NULL == localName)
     {
       ftpClose (&ftp);
+      printf("getDroneVersion exit 3");
       return -1;
     }
 
@@ -57,6 +61,7 @@ getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *v
       vp_os_free (localName);
       localName = NULL;
       ftpClose (&ftp);
+      printf("getDroneVersion exit 4");
       return -1;
     }
   
@@ -68,6 +73,7 @@ getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *v
       remove (localName);
       vp_os_free (localName);
       localName = NULL;
+      printf("getDroneVersion exit 5");
       return -1;
     }
 
@@ -78,6 +84,7 @@ getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *v
       remove (localName);
       vp_os_free (localName);
       localName = NULL;
+      printf("getDroneVersion exit 6");
       return -1;
     }
   
@@ -89,6 +96,7 @@ getDroneVersion (const char *tempPath, const char *droneIp, ardrone_version_t *v
   version->majorVersion = maj;
   version->minorVersion = min;
   version->revision = rev;
+  printf("getDroneVersion success");
 
   return 0;
 }

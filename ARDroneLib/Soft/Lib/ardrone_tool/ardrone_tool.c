@@ -377,6 +377,7 @@ int ardrone_tool_main(int argc, char **argv)
     {
       printf ("Getting AR.Drone version ...\n");
       vp_os_delay (250);
+      printf ("Getting AR.Drone version Finished sleeping...\n");
     }
 
 	res = ardrone_tool_setup_com( NULL );
