@@ -14,7 +14,7 @@
 #include <VP_Os/vp_os_types.h>
 #ifdef FFMPEG_SUPPORT
 #include <libavutil/avutil.h>
-#else
+#endif
 /**
  * Pixel format. Notes:
  *
@@ -60,7 +60,6 @@ enum PixelFormat {
     PIX_FMT_VYUY422,   ///< Packed pixel, Cr Y0 Cb Y1
     PIX_FMT_NB,
 };
-#endif
 
 #define OVERPAD                 16
 #define MB_WIDTH_Y              16

@@ -9,6 +9,9 @@
 
 #ifdef FFMPEG_SUPPORT
 
+#include <libavcodec/codec_id.h>
+#include <libavutil/imgutils.h>
+
 #include <VP_Os/vp_os_malloc.h>
 #include <VP_Os/vp_os_print.h>
 #include <ardrone_tool/Video/video_stage_ffmpeg_decoder.h>
@@ -112,24 +115,18 @@ C_RESULT ffmpeg_stage_decoding_open(ffmpeg_stage_decoding_config_t *cfg)
 {
   cfg->num_picture_decoded = 0;
   
-  /* must be called before using avcodec lib */
-  avcodec_init();
-  
-  /* register all the codecs */
-  avcodec_register_all();
-  
   av_log_set_level(FFMPEG_LOG_LEVEL);
 
-  cfg->pCodecMP4 = avcodec_find_decoder (CODEC_ID_MPEG4);
-  cfg->pCodecH264 = avcodec_find_decoder (CODEC_ID_H264);
+  cfg->pCodecMP4 = avcodec_find_decoder (AV_CODEC_ID_MPEG4);
+  cfg->pCodecH264 = avcodec_find_decoder (AV_CODEC_ID_H264);
   if(NULL == cfg->pCodecMP4 || NULL == cfg->pCodecH264) 
     {
       fprintf(stderr, "Unsupported codec!\n");
       return C_FAIL; // Codec not found
     }
 
-  cfg->pCodecCtxMP4 = avcodec_alloc_context();
-  cfg->pCodecCtxH264 = avcodec_alloc_context();
+  cfg->pCodecCtxMP4 = avcodec_alloc_context3(cfg->pCodecMP4);
+  cfg->pCodecCtxH264 = avcodec_alloc_context3(cfg->pCodecH264);
   if (NULL == cfg->pCodecCtxMP4 || NULL == cfg->pCodecCtxH264)
     {
       fprintf(stderr, "Impossible to allocate codec context\n");
@@ -139,37 +136,35 @@ C_RESULT ffmpeg_stage_decoding_open(ffmpeg_stage_decoding_config_t *cfg)
   cfg->pCodecCtxMP4->pix_fmt = PIX_FMT_YUV420P;
   cfg->pCodecCtxMP4->skip_frame = AVDISCARD_DEFAULT;
   cfg->pCodecCtxMP4->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
-  cfg->pCodecCtxMP4->error_recognition = FF_ER_CAREFUL;
   cfg->pCodecCtxMP4->skip_loop_filter = AVDISCARD_DEFAULT;
   cfg->pCodecCtxMP4->workaround_bugs = FF_BUG_AUTODETECT;
   cfg->pCodecCtxMP4->codec_type = AVMEDIA_TYPE_VIDEO;
-  cfg->pCodecCtxMP4->codec_id = CODEC_ID_MPEG4;
+  cfg->pCodecCtxMP4->codec_id = AV_CODEC_ID_MPEG4;
   cfg->pCodecCtxMP4->skip_idct = AVDISCARD_DEFAULT;
   
   cfg->pCodecCtxH264->pix_fmt = PIX_FMT_YUV420P;
   cfg->pCodecCtxH264->skip_frame = AVDISCARD_DEFAULT;
   cfg->pCodecCtxH264->error_concealment = FF_EC_GUESS_MVS | FF_EC_DEBLOCK;
-  cfg->pCodecCtxH264->error_recognition = FF_ER_CAREFUL;
   cfg->pCodecCtxH264->skip_loop_filter = AVDISCARD_DEFAULT;
   cfg->pCodecCtxH264->workaround_bugs = FF_BUG_AUTODETECT;
   cfg->pCodecCtxH264->codec_type = AVMEDIA_TYPE_VIDEO;
-  cfg->pCodecCtxH264->codec_id = CODEC_ID_H264;
+  cfg->pCodecCtxH264->codec_id = AV_CODEC_ID_H264;
   cfg->pCodecCtxH264->skip_idct = AVDISCARD_DEFAULT;
   		
   // Open codec
-  if(avcodec_open(cfg->pCodecCtxMP4, cfg->pCodecMP4) < 0)
+  if(avcodec_open2(cfg->pCodecCtxMP4, cfg->pCodecMP4, NULL) < 0)
     {
       fprintf (stderr, "Error opening MP4 codec\n");
       return C_FAIL;
     }
-  if(avcodec_open(cfg->pCodecCtxH264, cfg->pCodecH264) < 0)
+  if(avcodec_open2(cfg->pCodecCtxH264, cfg->pCodecH264, NULL) < 0)
     {
       fprintf (stderr, "Error opening h264 codec\n");
       return C_FAIL;
     }
 
-  cfg->pFrameOutput = avcodec_alloc_frame();
-  cfg->pFrame = avcodec_alloc_frame();
+  cfg->pFrameOutput = av_frame_alloc();
+  cfg->pFrame = av_frame_alloc();
   if (NULL == cfg->pFrameOutput || NULL == cfg->pFrame)
     {
       fprintf (stderr, "Unable to alloc frames");
@@ -279,6 +274,29 @@ static inline bool_t check_and_copy_PaVE (parrot_video_encapsulation_t *PaVE, vp
     }
 }
 
+int avcodec_decode_video2_compat(AVCodecContext *ctx, AVFrame *frame, int *got_frame, const AVPacket *pkt) {
+    int ret;
+
+    *got_frame = 0;
+
+    // Send the packet to the decoder
+    ret = avcodec_send_packet(ctx, pkt);
+    if (ret < 0) {
+        return ret;  // packet submission failed
+    }
+
+    // Try to receive a frame
+    ret = avcodec_receive_frame(ctx, frame);
+    if (ret == 0) {
+        *got_frame = 1;
+        return 0;  // success
+    } else if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+        return 0;  // no frame available now, but not a fatal error
+    } else {
+        return ret;  // decoding error
+    }
+}
+
 C_RESULT ffmpeg_stage_decoding_transform(ffmpeg_stage_decoding_config_t *cfg, vp_api_io_data_t *in, vp_api_io_data_t *out)
 {
   static const int        sws_flags = SWS_FAST_BILINEAR;
@@ -347,12 +365,12 @@ C_RESULT ffmpeg_stage_decoding_transform(ffmpeg_stage_decoding_config_t *cfg, vp
       cfg->dst_picture.width = PaVE.display_width;
       cfg->dst_picture.height = PaVE.display_height;
 		
-      out->size = avpicture_get_size(cfg->dst_picture.format, cfg->dst_picture.width, cfg->dst_picture.height);
+      out->size = av_image_get_buffer_size(cfg->dst_picture.format, cfg->dst_picture.width, cfg->dst_picture.height, 1);
       cfg->buffer = (uint8_t *)av_realloc(cfg->buffer, out->size * sizeof(uint8_t));
       out->buffers[0] = cfg->buffer;
 		
-      avpicture_fill((AVPicture *)pFrameOutput, (uint8_t*)out->buffers[out->indexBuffer], cfg->dst_picture.format,
-                     cfg->dst_picture.width, cfg->dst_picture.height);
+      av_image_fill_arrays(pFrameOutput->data, pFrameOutput->linesize, (uint8_t*)out->buffers[out->indexBuffer],
+                    cfg->dst_picture.format, cfg->dst_picture.width, cfg->dst_picture.height, 1);
 		
         
       cfg->img_convert_ctx = sws_getCachedContext(cfg->img_convert_ctx, PaVE.display_width, PaVE.display_height,
@@ -410,11 +428,11 @@ C_RESULT ffmpeg_stage_decoding_transform(ffmpeg_stage_decoding_config_t *cfg, vp
           // Decode video frame
           if (PaVE.video_codec == CODEC_MPEG4_VISUAL)
             {
-              avcodec_decode_video2 (pCodecCtxMP4, pFrame, &frameFinished, &packet);
+              avcodec_decode_video2_compat (pCodecCtxMP4, pFrame, &frameFinished, &packet);
             }
           else if (PaVE.video_codec == CODEC_MPEG4_AVC)
             {
-              avcodec_decode_video2 (pCodecCtxH264, pFrame, &frameFinished, &packet);
+              avcodec_decode_video2_compat (pCodecCtxH264, pFrame, &frameFinished, &packet);
             }
         
           // Did we get a video frame?

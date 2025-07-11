@@ -11,6 +11,7 @@
 #ifndef _VIDEO_STAGE_FFMPEG_DECODER_H_
 #define _VIDEO_STAGE_FFMPEG_DECODER_H_
 #include <VP_Api/vp_api.h>
+#include <VP_Api/vp_api_picture.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
