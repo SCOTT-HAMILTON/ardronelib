@@ -109,6 +109,13 @@ extern void  please_use_vp_os_free(void *ptr);
 extern void *please_use_vp_os_realloc(void *ptr, size_t size);
 extern void *please_use_vp_os_memset(void *s, int c, size_t n);
 
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#ifndef __cplusplus
 #undef calloc
 #undef malloc
 #undef memset
@@ -121,8 +128,6 @@ extern void *please_use_vp_os_memset(void *s, int c, size_t n);
 #define free    please_use_vp_os_free
 #define realloc please_use_vp_os_realloc
 
-#ifdef __cplusplus
-}
 #endif
 
 
