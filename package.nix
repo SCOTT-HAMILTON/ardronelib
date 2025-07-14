@@ -8,20 +8,20 @@
 , udev
 , wirelesstools
 , ffmpeg
-, nix-gitignore
+# , nix-gitignore
 }:
 
 stdenv.mkDerivation rec {
   pname = "ardronelib";
   version = "13-08-2025";
 
-  # src = fetchFromGitHub {
-  #   owner = "p-ranav";
-  #   repo = "argparse";
-  #   rev = "v${version}";
-  #   sha256 = "sha256-0fgMy7Q9BiQ/C1tmhuNpQgad8yzaLYxh5f6Ps38f2mk=";
-  # };
-  src = nix-gitignore.gitignoreSource [ ] ./.;
+  src = fetchFromGitHub {
+    owner = "SCOTT-HAMILTON";
+    repo = pname;
+    rev = "fecc30fe45a274158f6babbc69a5246930d735cb";
+    sha256 = "sha256-9yqp2WcYXb0hBU64i0hb97Kzms4fbNjZ6o8WAl0saS8=";
+  };
+  # src = nix-gitignore.gitignoreSource [ ] ./.;
 
   nativeBuildInputs = [ pkg-config ];
   buildInputs = [ SDL gtk2 libxml2 udev wirelesstools ffmpeg ];
@@ -45,7 +45,6 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "Patched version of ARDroneLib 2.0.1 used in ardrone_autonomy project";
-    license = licenses.mit;
     homepage = "https://github.com/SCOTT-HAMILTON/ardronelib";
     maintainers = [ "Scott Hamilton <sgn.hamilton+nixpkgs@protonmail.com>" ];
     platforms = platforms.linux;
